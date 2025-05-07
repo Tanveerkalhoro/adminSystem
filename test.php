@@ -93,8 +93,6 @@ $result4  =mysqli_query($conn,$sql4);
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
         <title>Subjects of Classes</title>
 
         <?php include("css.php"); ?>
@@ -143,58 +141,6 @@ $result4  =mysqli_query($conn,$sql4);
                     </div>
                 </form>
             </div>
-<div class="col-md-12">
-                <div class="form-group">
-                    <div class="custom-select" style="width:200px;">
-                        <select name="class_id2" id="class_id2">
-                            <option value="">Select Class:</option>
-                            <?php 
-                            $sql11 = "SELECT 
-                                        MIN(a.class_id) AS class_subject_id, -- or any other aggregate function
-                                        b.class_name,
-                                        MIN(c.subject_name) AS subject_name -- adjust as needed
-                                        FROM class_subjects a
-                                        INNER JOIN classes b ON a.class_id = b.class_id
-                                        INNER JOIN subjects c ON a.subject_id = c.subject_id
-                                        GROUP BY b.class_name";
-                            $result11 = mysqli_query($conn,$sql11);
-                            $count11 = mysqli_num_rows($result11);
-                            if($count11 > 0){
-                                while($data11 = mysqli_fetch_assoc($result11)){ ?>
-                                    <option value="<?php echo $data11['class_subject_id']?>" <?php if(isset($class_id) && $class_id == $data11['class_subject_id']){ echo " selected "; }?> ><?php echo $data11['class_name']; ?></option>
-                                <?php
-                                }
-                            }	
-                            ?>
-                        </select>
-                    </div>
-                    <div class="custom-select" style="width:200px;">
-                        <select name="subject_id2" id="subject_id2">
-                            <option value="0">Select Subject:</option>
-                            <?php 
-                                if(isset($class_id2)) { 
-                                    // echo $class_id2 ;
-                                    // die;
-                                   $sql12 = "SELECT a.*,b.class_name,c.subject_name
-                                        FROM class_subjects a
-                                        INNER JOIN classes b ON a.class_id =b.class_id	
-                                        INNER JOIN subjects c ON a.subject_id =c.subject_id 
-                                        WHERE a.class_id='$class_id' ";
-                                     $result12 = mysqli_query($conn,$sql12);
-                                    $count12 = mysqli_num_rows($result12);
-                                    if($count12 > 0) {
-                                        while( $data12 = mysqli_fetch_assoc($result12)){?>
-                                            <option value="<?php echo $data12['subject_id']; ?>"><?php echo $data12['subject_name']; ?></option>																
-                                            <?php
-                                        }																 
-                                    } 
-                                }?>
-                        </select>
-                    </div>
-                    
-                </div>
-                
-            </div>
             <div>
                 <table>
                      <thead>
@@ -241,74 +187,5 @@ $result4  =mysqli_query($conn,$sql4);
         <?php 
         include("footer.php"); ?>
         </div> 
-        <script>
-	
-
-		$(document).ready(function(){
-			$('#class_id2').on('change', function() {
-				data = [];
-				data[0] = class_id2; // source field name
-				data[1] = 'subject_id2'; // target field
-				data[2] = null;
-				data[3] = null;
-				data[4] = null;
-				generate_combo_new(data);
-			});
-		});
-
-
-		function generate_combo_new(data) {
-			source_field = data[0];
-			target_field = data[1];
-			other_option = data[2];
-			default_value = data[3];
-			other_value = data[4];
-
-			var dataString = '';
-			dataString = dataString + "source_field=" + $(source_field).attr('name') + "&" + $(source_field).attr('name') + "=" + $(source_field).val() + "";
-			dataString = dataString + "&target_field=" + target_field;
-			if (other_option != null) {
-				dataString = dataString + "&other_option=1";
-			}
-			if (other_value != null) {
-				dataString = dataString + "&other_value=" + other_value;
-			}
-
-			//alert(dataString);
-			// extra variables for query
-			if (data[4] != null) {
-				for (i = 4; i < data.length; i++) {
-					dataString = dataString + "&" + data[i] + "=" + $('#' + data[i] + '').val() + "";
-				}
-			}
-			//alert(source_field);
-			$.ajax({
-				url: 'generate_combo.php',
-				type: 'POST',
-				dataType: 'json',
-				data: dataString,
-
-				success: function(result) {
-
-					$('#' + target_field).html(""); //clear old options
-					result = eval(result);
-					for (i = 0; i < result.length; i++) {
-						for (key in result[i]) {
-							$('#' + target_field).get(0).add(new Option(result[i][key], [key]), document.all ? i : null);
-						}
-					}
-					if (default_value != null) {
-						$('#' + target_field).val(default_value); //select default value
-					} else {
-						$("option:first", target_field).attr("selected", "selected"); //select first option
-					}
-
-					$('#' + target_field).css("display", "inline");
-
-				}
-			});
-		}
-
-	</script>
     </body>
  </html>
